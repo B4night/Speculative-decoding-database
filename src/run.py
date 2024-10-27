@@ -1,8 +1,9 @@
 import torch
-from config import top_k, top_p, temperature, device
+from config import device
 from ar_sampling import autoregressive_sampling
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from sampling.speculative_sampling import speculative_sampling
+from benchmark.benchmark import benchmark
 
 def load_model(approx_model_path, target_model_path):
     '''
@@ -40,24 +41,20 @@ def load_model(approx_model_path, target_model_path):
     
     
 
-def run(input, approx_model_path, target_model_path, verbose, seed, benchmark, profiling, max_tokens, gamma):
-    approx_tokenizer, approx_model, target_tokenizer, target_model = load_model(approx_model_path, target_model_path)
-    
-    # approx_input_ids = approx_tokenizer.encode(input, return_tensors='pt').to(device)
-    # output = autoregressive_sampling(approx_input_ids, approx_model, max_tokens, temperature, top_k, top_p)
-    # approx_output = approx_tokenizer.decode(output[0], skip_special_tokens=True)
-    # print(f'Approx model output: {approx_output}\n\n')
-    
-    # target_input_ids = target_tokenizer.encode(input, return_tensors='pt').to(device)
-    # output = autoregressive_sampling(target_input_ids, target_model, max_tokens, temperature, top_k, top_p)
-    # target_output = target_tokenizer.decode(output[0], skip_special_tokens=True)
-    # print(f'Target model output: {target_output}\n\n')
+def run(input, approx_model, approx_tokenizer, target_model, target_tokenizer, verbose, is_benchmark_needed, profiling, default_max_tokens, temperature, top_k, top_p, default_gamma, random_seed):
+    # output arguments
+    print(f'==========================================Arguments=========================================\n')
+    print(f'Benchmark: {is_benchmark_needed}, max_tokens: {default_max_tokens}, temperature: {temperature}, top_k: {top_k}, top_p: {top_p}, gamma: {default_gamma}, random_seed: {random_seed}\n')
+    print(f'============================================================================================\n')
     input_ids = approx_tokenizer.encode(input, return_tensors='pt').to(device)
     
-    output_token_ids = speculative_sampling(input_ids, approx_model, target_model, max_tokens, gamma, temperature, top_k, top_p, seed)
+    output_token_ids = speculative_sampling(input_ids, approx_model, target_model, default_max_tokens, temperature, top_k, top_p, default_gamma, random_seed)
     
-    approx_output = approx_tokenizer.decode(output_token_ids[0], skip_special_tokens=True)
-    target_output = target_tokenizer.decode(output_token_ids[0], skip_special_tokens=True)
+    # approx_output = approx_tokenizer.decode(output_token_ids[0], skip_special_tokens=True)
+    # target_output = target_tokenizer.decode(output_token_ids[0], skip_special_tokens=True)
     
-    print(f'Approx model output: {approx_output}\n\n')
-    print(f'Target model output: {target_output}\n\n')
+    # print(f'Approx model output: {approx_output}\n\n')
+    # print(f'Target model output: {target_output}\n\n')
+    
+    if is_benchmark_needed:
+        benchmark(input_ids, target_model, default_max_tokens=default_max_tokens, temperature=temperature, top_k=top_k, top_p=top_p)
