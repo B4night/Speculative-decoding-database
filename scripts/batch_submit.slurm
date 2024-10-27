@@ -1,8 +1,10 @@
 #!/bin/bash
 #SBATCH --time=72:00:00
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --mem=350GB
-#SBATCH --gres=gpu:a100:4
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=350G
+#SBATCH --gpus=4
+#SBATCH --gpus-per-node=4
+#SBATCH --constraint=a100
 
-python t.py
+/ibex/user/feic/mambaforge/bin/conda activate sd j
+python /ibex/user/feic/pjs/Speculative-decoding/Speculative-decoding-database/src/main.py

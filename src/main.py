@@ -19,7 +19,7 @@ if __name__ == '__main__':
     
     
     # Non-interactive mode, for testing purposes
-    approx_tokenizer, approx_model, target_tokenizer, target_model = load_model(model_list['llama3.2-8b'], model_list['llama3-70b'])
+    approx_tokenizer, approx_model, target_tokenizer, target_model = load_model(model_list['llama3-8b'], model_list['llama3-70b'])
     input = 'Any recommendations for playing video games?'
     
     #     random_seed = [42]
