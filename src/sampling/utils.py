@@ -1,19 +1,28 @@
 import torch
 from torch.nn import functional as F
 
-def top_k_top_p_filtering(logits, top_k, top_p):
+def top_k_filtering(logits, top_k):
     if top_k > 0:
-        filter = torch.topk(logits, min(top_k, logits.size(-1)))[0]
+        filter = torch.topk(logits, min(top_k, logits.shape[1]))[0]
         logits[logits < filter[:, [-1]]] = float('-inf')
-    if top_p > 0.0:
+    return logits
+
+def top_p_filtering(logits, top_p):
+    if top_p > 0.0 and top_p < 1.0:
         sorted_logits, sorted_indices = torch.sort(logits, descending=True)
-        cumulative_probs = torch.cumsum(
-            F.softmax(sorted_logits, dim=-1), dim=-1)
-        filter = cumulative_probs > top_p
-        filter[..., 1:] = filter[..., :-1].clone()
-        filter[..., 0] = 0
-        indices_to_remove = filter.scatter(1, sorted_indices, filter)
+        sorted_probs = F.softmax(sorted_logits, dim=-1)
+        cumulative_probs = torch.cumsum(sorted_probs, dim=-1)
+        sorted_indices_to_remove = cumulative_probs > top_p
+        sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
+        sorted_indices_to_remove[..., 0] = 0
+        
+        indices_to_remove = sorted_indices_to_remove.scatter(1, sorted_indices, sorted_indices_to_remove)
         logits[indices_to_remove] = float('-inf')
+    return logits
+
+def top_k_top_p_filtering(logits, top_k, top_p):
+    logits = top_k_filtering(logits, top_k)
+    logits = top_p_filtering(logits, top_p)
     return logits
 
 def norm_logits(logits, temperature, top_k, top_p):
@@ -38,6 +47,6 @@ def sample(probs, num_samples):
     return next_token_id
 
 def norm_max(input):
-    token_max = torch.where(input > 0, input, torch.zeros_like(input))
+    token_max = torch.where(input > 0, input, torch.tensor(0.0, device=input.device))
     token_max_sum = torch.sum(token_max, dim=1, keepdim=True)
     return token_max / token_max_sum

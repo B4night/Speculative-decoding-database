@@ -3,7 +3,7 @@ from sampling.utils import sample, norm_logits, norm_max
 import pudb
 
 def speculative_sampling(prefix, approx_model, target_model, max_len, gamma, temperature, top_k, top_p, random_seed):
-    seq_len = len(prefix)
+    seq_len = prefix.shape[1]
     target_len = seq_len + max_len
     
     # gamma = 1
@@ -37,16 +37,21 @@ def speculative_sampling(prefix, approx_model, target_model, max_len, gamma, tem
             token_to_add = tmp_prefix[:, prefix_len + i]
             
             if random_num < torch.min(torch.tensor([1], device=target_model.device), target_output[:, prefix_len + i - 1, token_to_add] / approx_output[:, prefix_len + i - 1, token_to_add]):
-                # accept
+                # If target_output's probability is higher than approx_output's probability, accept
+                # else, accept with a probabilily
                 n += 1
             else:
-                # reject
+                # reject, generate next token from target model's output logits.
                 is_all_accept = False
                 t = sample(norm_max(target_output[:, n] - approx_output[:, n]), 1)
                 break
             
         if is_all_accept:
-            t = sample(target_output[:, -1], 1)
+            t = torch.cat([
+                    sample(target_output[:, prefix_len - 1 + i].squeeze(), 1) 
+                    for i in range(gamma)
+                ])
+            t = t.reshape(1, t.shape[0])
         
         prefix = torch.cat([prefix, t], dim=1)
         
