@@ -4,6 +4,8 @@ from ar_sampling import autoregressive_sampling
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from sampling.speculative_sampling import speculative_sampling
 from benchmark.benchmark import benchmark
+from database.db import db_demo
+from database.validate import validate
 
 def load_model(approx_model_path, target_model_path):
     '''
@@ -41,7 +43,7 @@ def load_model(approx_model_path, target_model_path):
     
     
 
-def run(input, approx_model, approx_tokenizer, target_model, target_tokenizer, verbose, is_benchmark_needed, profiling, default_max_tokens, temperature, top_k, top_p, default_gamma, random_seed):
+def run_model_sd(input, approx_model, approx_tokenizer, target_model, target_tokenizer, verbose, is_benchmark_needed, profiling, default_max_tokens, temperature, top_k, top_p, default_gamma, random_seed):
     # output arguments
     print(f'==========================================Arguments=========================================\n')
     print(f'Benchmark: {is_benchmark_needed}, max_tokens: {default_max_tokens}, temperature: {temperature}, top_k: {top_k}, top_p: {top_p}, gamma: {default_gamma}, random_seed: {random_seed}\n')
@@ -58,3 +60,15 @@ def run(input, approx_model, approx_tokenizer, target_model, target_tokenizer, v
     
     if is_benchmark_needed:
         benchmark(input_ids, target_model, default_max_tokens=default_max_tokens, temperature=temperature, top_k=top_k, top_p=top_p)
+        
+def run_db_sd(input, model, tokenizer, default_max_tokens, temperature, top_k, top_p, random_seed, threshold):
+    db_answer = db_demo(input)
+    input_ids = tokenizer.encode(input, return_tensors='pt').to(device)
+    db_answer_ids = tokenizer.encode(db_answer, return_tensors='pt').to(device)
+    
+    validation_score = validate(model, input_ids, db_answer_ids, temperature=temperature, top_k=top_k, top_p=top_p)
+    if validation_score > threshold:
+        print(f'Validation score: {validation_score}, Validation passed for the database answer: {db_answer}')
+    else:
+        print(f'Validation score: {validation_score}, Validation failed for the database answer: {db_answer}')
+        # other operations.

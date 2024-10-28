@@ -1,0 +1,6 @@
+demo_answer = {
+    'Any recommendations for playing video games?': 'I\'d be happy to recommend some video games across various platforms and genres. Here are a few suggestions:\n\n**New Releases:**\n\n1. **The Last of Us Part II** (PS4): A highly-acclaimed action-adventure game with a strong narrative focus.\n2. **Halo Infinite** (Xbox, PC): A first-person shooter with a rich sci-fi universe and engaging multiplayer.\n3. **Deathloop** (PS5, PC): A unique time-looping shooter with a stylish aesthetic and challenging gameplay.\n4. **Ratchet & Clank: Rift Apart** (PS5): A colorful, action-packed platformer with stunning visuals and humor.\n\n**Indie Gems:**\n\n1. **Cuphead** (Multi-platform): A challenging run-and-gun game with beautiful hand-drawn animation and a jazzy soundtrack.\n2. **Hyper Light Drifter** (Multi-platform): A top-down action game with a beautiful art style and a touching narrative.\n3. **Night in the Woods** (Multi-platform): A narrative-driven adventure game with relatable characters and a charming atmosphere.\n4. **Slay the Spire** (Multi-platform): A roguelike deck-builder with addictive gameplay and a unique blend of strategy and RPG elements.\n\n"',
+}
+
+def db_demo(prefix):
+    return demo_answer['Any recommendations for playing video games?']
