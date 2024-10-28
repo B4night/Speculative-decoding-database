@@ -21,3 +21,5 @@ $$
 
 1. 以avg_prob的概率接收db_answer
 2. 比较avg_prob和threshold
+
+123
