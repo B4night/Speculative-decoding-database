@@ -15,3 +15,9 @@ $$
 
 ## 加权概率验证策略
 对分支中的每个token使用加权概率，比如说更重视序列前半部分或后半部分的准确性。
+
+# Metheology
+计算db-answer每个token的prob和，然后除以token数，得到avg_prob
+
+1. 以avg_prob的概率接收db_answer
+2. 比较avg_prob和threshold

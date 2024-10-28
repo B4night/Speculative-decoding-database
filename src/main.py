@@ -28,8 +28,8 @@ if __name__ == '__main__':
     # top_k = [20, 30, 40]
     # top_p = [0.9]
     # temperature = [0.5, 1, 1.5]
-    output_dir = '/ibex/user/feic/pjs/Speculative-decoding/Speculative-decoding-database/src/output/output-8-70'
-    cnt = 1
+    # output_dir = '/ibex/user/feic/pjs/Speculative-decoding/Speculative-decoding-database/src/output/output-8-70'
+    # cnt = 1
     # for seed in random_seed:
     #     for max_tokens in default_max_tokens:
     #         for gamma in default_gamma:
@@ -64,3 +64,4 @@ if __name__ == '__main__':
                     for p in top_p:
                         for temp in temperature:
                             run_db_sd(input, target_model, target_tokenizer, default_max_tokens=max_tokens, temperature=temp, top_k=k, top_p=p, random_seed=seed, threshold=0.5)
+                            # break
